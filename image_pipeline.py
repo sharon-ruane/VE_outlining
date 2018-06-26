@@ -92,7 +92,7 @@ while len(image_section_batch) < batch_size:
     binary_outlines_arr = np.asarray(binary_outlines)
     #print(np.asarray(binary_outlines))
 
-    x = random.randint(20, 75)
+    x = random.randint(50, 80)
 
     crop_im, b_box = crop_image_in_centre(emb_outlines_image, (x,x))
     #crop_im.show()
@@ -128,6 +128,9 @@ while len(image_section_batch) < batch_size:
         image_section_batch.append(np.asarray(emb_raw_image.crop(box = b_box)))
         pixel_labels_batch.append((np.asarray(emb_outlines_image.crop(box = b_box))))
         emb_outlines_image.show()
+
+        ### resizing step!!
+
         emb_raw_image.crop(box=b_box).show()
         emb_raw_image.show()
         emb_outlines_image.crop(box=b_box).show()
@@ -139,9 +142,9 @@ while len(image_section_batch) < batch_size:
 
 
 
-for pic in image_section_batch:
-    img = Image.fromarray(pic)
-    img.show()
+# for pic in image_section_batch:
+#     img = Image.fromarray(pic)
+#     img.show()
 
 for pic in pixel_labels_batch:
     img = Image.fromarray(pic)
