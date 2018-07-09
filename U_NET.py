@@ -12,7 +12,7 @@ from PIL import Image
 
 
 class myUnet(object):
-    def __init__(self, img_rows=80, img_cols=80, lowest_loss=2):
+    def __init__(self, img_rows=176, img_cols=176, lowest_loss=2):
         self.img_rows = img_rows
         self.img_cols = img_cols
         self.lowest_loss = lowest_loss
@@ -51,16 +51,15 @@ class myUnet(object):
 
         conv4 = Conv2D(512, 3, activation='relu', padding='same', kernel_initializer='he_normal')(pool3)
         conv4 = Conv2D(512, 3, activation='relu', padding='same', kernel_initializer='he_normal')(conv4)
-        drop4 = Dropout(0.5)(conv4)
-        pool4 = MaxPooling2D(pool_size=(2, 2))(drop4)
+        pool4 = MaxPooling2D(pool_size=(2, 2))(conv4)
 
         conv5 = Conv2D(1024, 3, activation='relu', padding='same', kernel_initializer='he_normal')(pool4)
         conv5 = Conv2D(1024, 3, activation='relu', padding='same', kernel_initializer='he_normal')(conv5)
-        drop5 = Dropout(0.5)(conv5)
+
 
         up6 = Conv2D(512, 2, activation='relu', padding='same', kernel_initializer='he_normal')(
-            UpSampling2D(size=(2, 2))(drop5))
-        merge6 = merge([drop4, up6], mode='concat', concat_axis=3)
+            UpSampling2D(size=(2, 2))(conv5))
+        merge6 = merge([conv4, up6], mode='concat', concat_axis=3)
         conv6 = Conv2D(512, 3, activation='relu', padding='same', kernel_initializer='he_normal')(merge6)
         conv6 = Conv2D(512, 3, activation='relu', padding='same', kernel_initializer='he_normal')(conv6)
 
@@ -108,7 +107,7 @@ class myUnet(object):
         print("current_loss: {}").format(self.current_loss)
 
         if self.current_loss < self.lowest_loss - 0.02:
-            weightfolder = 'savedmodels_unet_3/titletraining_weightsatloss_{0:.2f}'.format(self.current_loss)
+            weightfolder = 'savedmodels_unet_5/titletraining_weightsatloss_{0:.2f}'.format(self.current_loss)
             if not os.path.isdir(weightfolder):
                 os.makedirs(weightfolder)
             print('Saving {}/weights.h5'.format(weightfolder))

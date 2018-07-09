@@ -26,8 +26,8 @@ opt_z_stack_dict["POSTERIOR = \"Embryo 2\", Nov. 28th Emb (2)_L3_Sum.lsm (splice
 opt_z_stack_dict["EARLY Posterior = \"Embryo 6\", Feb. 20th Emb (1)_L6_Sum.lsm (spliced)"] = 3
 opt_z_stack_dict["LATE Posterior = \"Embryo 6\", Feb. 20th Emb (1)_L6_Sum.lsm (spliced)"] = 4
 
-batch_size = 1
-size_to_resize_to = (80, 80)
+batch_size = 72
+size_to_resize_to = (176,176)
 
 ## need to sep out the lists -- allocate 2 for validation
 training_generator = emb_image_batch_generator(data_folder, emb_list, batch_size, size_to_resize_to, opt_z_stack_dict)
@@ -63,7 +63,7 @@ while True:
 #
 # for i in range(outlines_test.shape[0]):
 #     pred = outlines_test[i]
-#     mask = pred.reshape(80,80)
+#     mask = pred.reshape(100,100)
 #
 #     mask = mask
 #     mask[mask > 0.5] = 255
