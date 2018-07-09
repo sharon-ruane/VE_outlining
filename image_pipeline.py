@@ -1,10 +1,18 @@
 import os
+import time
 import random
 import numpy as np
 from PIL import Image
 from PIL import ImageDraw
 from itertools import groupby
 from keras.preprocessing.image import ImageDataGenerator
+
+def overlap_box(box1, box2):
+    x_left = max(box1[0], box2[0])
+    y_top = max(box1[1], box2[1])
+    x_right = min(box1[2], box2[2])
+    y_bottom = min(box1[3], box2[3])
+    return (x_left, y_top, x_right, y_bottom)
 
 def crop_image_in_centre(im,size):
     w,h=im.size
@@ -13,12 +21,17 @@ def crop_image_in_centre(im,size):
     box =(l,d,l+size[0],d+size[1])
     return im.crop(box), box
 
+def crop_image_in_special_box(im, special_box, size):
+    l,d = random.randint(special_box[0], special_box[2] - size[0]), random.randint(special_box[1], special_box[3] - size[1])
+    box =(l,d,l+size[0],d+size[1])
+    return im.crop(box), box
+
 
 data_folder = "/home/iolie/PhD_Thesis_Data/epithelial_cell_border_identification"
 emb_list = os.listdir(data_folder)
-print(emb_list)
+#print(emb_list)
 emb_list.remove('.DS_Store')
-print(emb_list)
+#print(emb_list)
 
 opt_z_stack_dict = {}
 opt_z_stack_dict["AAntnew33-47.lsm (cropped)"] = 3
@@ -35,14 +48,18 @@ opt_z_stack_dict["EARLY Posterior = \"Embryo 6\", Feb. 20th Emb (1)_L6_Sum.lsm (
 opt_z_stack_dict["LATE Posterior = \"Embryo 6\", Feb. 20th Emb (1)_L6_Sum.lsm (spliced)"] = 4
 #print(opt_z_stack_dict)
 
-batch_size = 1
+batch_size = 5
 
 #while True:
 image_section_batch = []
 pixel_labels_batch = []
-counter = 0
+
+
+start = time.time()
+print "hello"
+
 while len(image_section_batch) < batch_size:
-#while counter < 5:
+
     emb_choice = random.choice(emb_list)
     #print(emb_choice)
     timepoints = []  #### in fairness dude you should pre-compile this
@@ -59,16 +76,17 @@ while len(image_section_batch) < batch_size:
     image_needed = time_split + "C02" + "Z00" + str(opt_z) + ".tif"
     #print(image_needed)
 
-    emb_raw_image = Image.open(os.path.join(timepoint, image_needed))
+    emb_raw_image = Image.open(os.path.join(timepoint, image_needed)).convert("L")
     outlines_poss_multiple = []
     for file in os.listdir(timepoint):
         if file.startswith('xCell'):
             outlines_poss_multiple.append(file)
     #print(outlines_poss_multiple)
 
-    #emb_raw_image.show()
+    #emb_raw_image.()
     emb_outlines_image = Image.open(os.path.join(timepoint, random.choice(outlines_poss_multiple)))
     #emb_outlines_image.show()
+
 
     pixdata = emb_outlines_image.load()
     for y in xrange(emb_outlines_image.size[1]):
@@ -87,75 +105,118 @@ while len(image_section_batch) < batch_size:
     #emb_outlines_image.show()
     #counter += 1
 
-#
+
     binary_outlines = emb_outlines_image.convert("1")
+    usable_outlines = binary_outlines.convert("L")
+    binary_outlines.show()
+    usable_outlines.show()
+    print("***************************")
+    print(np.asarray(usable_outlines))
     binary_outlines_arr = np.asarray(binary_outlines)
-    #print(np.asarray(binary_outlines))
+    print(np.asarray(binary_outlines_arr).shape)
 
-    x = random.randint(50, 80)
+    auto_bounding_box_pixels = emb_outlines_image.getbbox()
+    center_bit = ((emb_outlines_image.size[0]// 4), (emb_outlines_image.size[1]// 4),
+                 (emb_outlines_image.size[0]// 4) * 3, (emb_outlines_image.size[1]// 4) * 3)
 
-    crop_im, b_box = crop_image_in_centre(emb_outlines_image, (x,x))
-    #crop_im.show()
-    #print("bounding box: " + str(b_box))
-
-    w_range = range(b_box[0], b_box[2])
-    h_range = range(b_box[1], b_box[3])
-    bb_w1_pixels = [binary_outlines_arr[(b_box[1]), i] for i in w_range]
-    bb_w2_pixels = [binary_outlines_arr[(b_box[3]), i] for i in w_range]
-    bb_h1_pixels = [binary_outlines_arr[(i, b_box[0])] for i in h_range]
-    bb_h2_pixels = [binary_outlines_arr[(i, b_box[2])] for i in h_range]
-
-    #print(bb_w1_pixels)
-    # print("topline: " + str([len(list(group)) for key, group in groupby(bb_w1_pixels)]))
-    # print("bottomline: " + str([len(list(group)) for key, group in groupby(bb_w2_pixels)]))
-    # print("leftline: " + str([len(list(group)) for key, group in groupby(bb_h1_pixels)]))
-    # print("rightline: " + str([len(list(group)) for key, group in groupby(bb_h2_pixels)]))
-
-    bb_w1_test_pixels = [(i, b_box[1]) for i in w_range]
-    bb_w2_test_pixels = [(i, b_box[3]) for i in w_range]
-    bb_h1_test_pixels = [(b_box[0], i) for i in h_range]
-    bb_h2_test_pixels = [(b_box[2], i) for i in h_range]
-    test_bounding_box_pixels = bb_w1_test_pixels + bb_w2_test_pixels + bb_h1_test_pixels + bb_h2_test_pixels
-    #draw = ImageDraw.Draw(emb_outlines_image)
-    #draw.point(test_bounding_box_pixels, fill=128)   ####### YES!!!! correct
-    #emb_outlines_image.show()
-
-    x = [any(bb_w1_pixels), any(bb_w2_pixels), any(bb_h1_pixels), any(bb_h2_pixels)]
-    #print(x)
-    #print(all(x))
-    if all(x) == True:
-        print("Successful crop --- Adding to batch!")
-        image_section_batch.append(np.asarray(emb_raw_image.crop(box = b_box)))
-        pixel_labels_batch.append((np.asarray(emb_outlines_image.crop(box = b_box))))
-        emb_outlines_image.show()
-
-        ### resizing step!!
-
-        emb_raw_image.crop(box=b_box).show()
-        emb_raw_image.show()
-        emb_outlines_image.crop(box=b_box).show()
+    if binary_outlines_arr.any():
+        check_box = overlap_box(auto_bounding_box_pixels, center_bit)
     else:
-        print("Not suitable")
-    counter += 1
-    print("Currently looking in " + str(emb_choice) + str(time_split))
-    print("Attempting crop number: " + str(counter))
+        check_box = center_bit
+
+    counter = 0
+    while counter < 10 and len(image_section_batch) < batch_size:
+        y = random.randint(30, 80)
+        crop_im, b_box = crop_image_in_special_box(emb_outlines_image, check_box, (y,y))
+        print(y)
+        #crop_im.show()
+        #print("bounding box: " + str(b_box))
+
+        w_range = range(b_box[0], b_box[2])
+        h_range = range(b_box[1], b_box[3])
+        bb_w1_pixels = [binary_outlines_arr[(b_box[1]), i] for i in w_range]
+        bb_w2_pixels = [binary_outlines_arr[(b_box[3]), i] for i in w_range]
+        bb_h1_pixels = [binary_outlines_arr[(i, b_box[0])] for i in h_range]
+        bb_h2_pixels = [binary_outlines_arr[(i, b_box[2])] for i in h_range]
+
+        #print(bb_w1_pixels)
+        # print("topline: " + str([len(list(group)) for key, group in groupby(bb_w1_pixels)]))
+        # print("bottomline: " + str([len(list(group)) for key, group in groupby(bb_w2_pixels)]))
+        # print("leftline: " + str([len(list(group)) for key, group in groupby(bb_h1_pixels)]))
+        # print("rightline: " + str([len(list(group)) for key, group in groupby(bb_h2_pixels)]))
+
+        bb_w1_test_pixels = [(i, b_box[1]) for i in w_range]
+        bb_w2_test_pixels = [(i, b_box[3]) for i in w_range]
+        bb_h1_test_pixels = [(b_box[0], i) for i in h_range]
+        bb_h2_test_pixels = [(b_box[2], i) for i in h_range]
+        test_bounding_box_pixels = bb_w1_test_pixels + bb_w2_test_pixels + bb_h1_test_pixels + bb_h2_test_pixels
+
+        # print(center_bit)
+        #emb_outlines_image.show()
+        # draw = ImageDraw.Draw(emb_outlines_image)
+        # draw.point(test_bounding_box_pixels, fill=(0,0,128))
+        # draw.rectangle(auto_bounding_box_pixels, fill=(0,128, 0))   ####### YES!!!! correct
+        # draw.point(test_bounding_box_pixels, fill=(0, 0, 128))#emb_outlines_image.show()
+        # draw.rectangle(center_bit, fill=(0,0,255))
+        # emb_outlines_image.show()
+        # draw.rectangle(check_box, fill=(255,0,255))
+        #emb_outlines_image.show()
+
+        x = [any(bb_w1_pixels), any(bb_w2_pixels), any(bb_h1_pixels), any(bb_h2_pixels)]
+        print(x)
+        #print(all(x))
+        if all(x) == True:
+            print("Successful crop --- Adding to batch!")
+            crop_emb_raw_image = emb_raw_image.crop(box=b_box)
+            image_section_batch.append(np.asarray(crop_emb_raw_image.resize((80,80))).reshape(80,80,1))
+            print(np.asarray(crop_emb_raw_image.resize((80, 80))).shape)
+            crop_emb_outlines_image = usable_outlines.crop(box=b_box)
+            #print(np.asarray(crop_emb_outlines_image.resize((80,80))).shape)
+            pixel_labels_batch.append(np.asarray(crop_emb_outlines_image.resize((80,80)) ).reshape(80,80,1))
+
+            ### resizing step!!
+
+            #emb_raw_image.crop(box=b_box).show()
+            #emb_raw_image.show()
+            #emb_outlines_image.crop(box=b_box).show()
+        else:
+            print("Not suitable")
+        counter += 1
+        print("Currently looking in " + str(emb_choice) + str(time_split))
+        print("Attempting crop number: " + str(counter))
 
 
 
-# for pic in image_section_batch:
-#     img = Image.fromarray(pic)
-#     img.show()
+end = time.time()
+print(end - start)
 
-for pic in pixel_labels_batch:
-    img = Image.fromarray(pic)
+
+print(np.asarray(image_section_batch).shape)
+print(np.asarray(pixel_labels_batch)[0])
+print(len(pixel_labels_batch))
+for pic in image_section_batch:
+    img = Image.fromarray(pic.reshape(80,80))
     img.show()
+#
+for pic in pixel_labels_batch:
+    img = Image.fromarray(pic.reshape(80,80))
+    img.show()
+
+
+
+
+# piclist = []
+# for dirpath, subdirs, files in os.walk(data_folder):
+#     for f in files:
+#         if f.endswith('.jpg'):
+#             piclist.append(os.path.join(dirpath, f))
+
 
 
 # emb_raw_image_arr = np.asarray(emb_raw_image)
 # print(emb_raw_image_arr.shape)
 # emb_outlines_image_arr = np.asarray(emb_outlines_image)
 # print(emb_outlines_image_arr.shape)
-
 
 
 # emb_image = Image.open(os.path.join(data_folder, "AAntnew33-47.lsm (cropped)/T00010/xCell outlines copy 3"))
