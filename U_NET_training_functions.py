@@ -56,9 +56,9 @@ def emb_image_batch_generator(data_folder, emb_list, batch_size, size_to_resize_
                     else:
                         pixdata[x, y] = (255, 255, 255)
 
-            rotations = random.randint(0, 360)
-            emb_raw_image = emb_raw_image.rotate(rotations)
-            emb_outlines_image = emb_outlines_image.rotate(rotations)
+            #rotations = random.randint(0, 360)
+            #emb_raw_image = emb_raw_image.rotate(rotations)
+            #emb_outlines_image = emb_outlines_image.rotate(rotations)
 
             binary_outlines = emb_outlines_image.convert("1")
             usable_outlines = binary_outlines.convert("L")
@@ -69,8 +69,8 @@ def emb_image_batch_generator(data_folder, emb_list, batch_size, size_to_resize_
                           (emb_outlines_image.size[0] // 4) * 3, (emb_outlines_image.size[1] // 4) * 3)
 
             counter = 0
-            while counter < 10 and len(image_section_batch) < batch_size:
-                y = random.randint(50, 176)
+            while counter < 5 and len(image_section_batch) < batch_size:
+                y = random.randint(45, 60)
                 if binary_outlines_arr.any():
                     check_box = overlap_box(auto_bounding_box_pixels, center_bit)
                 else:
@@ -98,13 +98,15 @@ def emb_image_batch_generator(data_folder, emb_list, batch_size, size_to_resize_
                 if all(x) == True:
                     #log.info("Successful crop --- Adding to batch!")
                     crop_emb_raw_image = emb_raw_image.crop(box=b_box)
-                    crop_emb_raw_image_arr = np.asarray(crop_emb_raw_image.resize((176, 176))).reshape(176, 176, 1)
-                    #Image.fromarray(crop_emb_raw_image_arr.reshape(128, 128)).show()
+                    crop_emb_raw_image_arr = np.asarray(crop_emb_raw_image.resize((80, 80))).reshape(80, 80, 1)
+
+                    #Image.fromarray(crop_emb_raw_image_arr.reshape(80, 80)).show()
                     image_section_batch.append(crop_emb_raw_image_arr/255)
                     # crop_emb_outlines_image = binary_outlines.crop(box=b_box)
                     crop_emb_outlines_image = usable_outlines.crop(box=b_box)
-                    crop_emb_outlines_image_arr = np.asarray(crop_emb_outlines_image.resize((176, 176))).reshape(176, 176, 1)
-                    #Image.fromarray(crop_emb_outlines_image_arr.reshape(128, 128)).show()
+                    crop_emb_outlines_image_arr = np.asarray(crop_emb_outlines_image.resize((80, 80))).reshape(80,80, 1)
+                    # crop_emb_outlines_image_arr = np.asarray(crop_emb_outlines_image.resize((80, 80))).reshape(80, 80, 1)
+                    #Image.fromarray(crop_emb_outlines_image_arr.reshape(80, 80)).show()
                     #crop_emb_outlines_image.show()
                     pixel_labels_batch.append(crop_emb_outlines_image_arr/255)
                 counter += 1
@@ -173,7 +175,8 @@ def make_test_batch(test_emb_folder, test_batch_size, opt_z_stack_dict):
 
         counter = 0
         while counter < 10 and len(test_batch) < test_batch_size:
-            y = 96
+            y = 80
+
             if binary_outlines_arr.any():
                 check_box = overlap_box(auto_bounding_box_pixels, center_bit)
             else:
@@ -200,7 +203,7 @@ def make_test_batch(test_emb_folder, test_batch_size, opt_z_stack_dict):
             if all(x) == True:
                 # log.info("Successful crop --- Adding to batch!")
                 crop_emb_raw_image = emb_raw_image.crop(box=b_box)
-                test_batch.append(np.asarray(crop_emb_raw_image).reshape(176, 176, 1)) # this has gotta go in the net
+                test_batch.append(np.asarray(crop_emb_raw_image.resize((80, 80))).reshape(80, 80, 1)) # this has gotta go in the net
                 crop_emb_outlines_image = emb_outlines_image.crop(box=b_box)
                 ground_truth.append(np.asarray(crop_emb_outlines_image))  # just want pic here
             counter += 1

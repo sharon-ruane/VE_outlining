@@ -126,7 +126,7 @@ while len(image_section_batch) < batch_size:
 
     counter = 0
     while counter < 10 and len(image_section_batch) < batch_size:
-        y = random.randint(30, 80)
+        y = random.randint(40, 60)
         crop_im, b_box = crop_image_in_special_box(emb_outlines_image, check_box, (y,y))
         print(y)
         #crop_im.show()

@@ -28,59 +28,59 @@ class myUnet(object):
     def get_unet(self):
         inputs = Input((self.img_rows, self.img_cols, 1))
 
-        conv1 = Conv2D(64, 3, activation='relu', padding='same', kernel_initializer='he_normal')(inputs)
+        conv1 = Conv2D(128, 3, activation='relu', padding='same', kernel_initializer='he_normal')(inputs)
         print("conv1 shape:", conv1.shape)
-        conv1 = Conv2D(64, 3, activation='relu', padding='same', kernel_initializer='he_normal')(conv1)
+        conv1 = Conv2D(128, 3, activation='relu', padding='same', kernel_initializer='he_normal')(conv1)
         print("conv1 shape:", conv1.shape)
         pool1 = MaxPooling2D(pool_size=(2, 2))(conv1)
         print("pool1 shape:", pool1.shape)
 
-        conv2 = Conv2D(128, 3, activation='relu', padding='same', kernel_initializer='he_normal')(pool1)
+        conv2 = Conv2D(216, 3, activation='relu', padding='same', kernel_initializer='he_normal')(pool1)
         print("conv2 shape:", conv2.shape)
-        conv2 = Conv2D(128, 3, activation='relu', padding='same', kernel_initializer='he_normal')(conv2)
+        conv2 = Conv2D(216, 3, activation='relu', padding='same', kernel_initializer='he_normal')(conv2)
         print("conv2 shape:", conv2.shape)
         pool2 = MaxPooling2D(pool_size=(2, 2))(conv2)
         print("pool2 shape:", pool2.shape)
 
-        conv3 = Conv2D(256, 3, activation='relu', padding='same', kernel_initializer='he_normal')(pool2)
+        conv3 = Conv2D(512, 3, activation='relu', padding='same', kernel_initializer='he_normal')(pool2)
         print("conv3 shape:", conv3.shape)
-        conv3 = Conv2D(256, 3, activation='relu', padding='same', kernel_initializer='he_normal')(conv3)
+        conv3 = Conv2D(512, 3, activation='relu', padding='same', kernel_initializer='he_normal')(conv3)
         print("conv3 shape:", conv3.shape)
         pool3 = MaxPooling2D(pool_size=(2, 2))(conv3)
         print("pool3 shape:", pool3.shape)
 
-        conv4 = Conv2D(512, 3, activation='relu', padding='same', kernel_initializer='he_normal')(pool3)
-        conv4 = Conv2D(512, 3, activation='relu', padding='same', kernel_initializer='he_normal')(conv4)
+        conv4 = Conv2D(1024, 3, activation='relu', padding='same', kernel_initializer='he_normal')(pool3)
+        conv4 = Conv2D(1024, 3, activation='relu', padding='same', kernel_initializer='he_normal')(conv4)
         pool4 = MaxPooling2D(pool_size=(2, 2))(conv4)
 
-        conv5 = Conv2D(1024, 3, activation='relu', padding='same', kernel_initializer='he_normal')(pool4)
-        conv5 = Conv2D(1024, 3, activation='relu', padding='same', kernel_initializer='he_normal')(conv5)
+        conv5 = Conv2D(2048, 3, activation='relu', padding='same', kernel_initializer='he_normal')(pool4)
+        conv5 = Conv2D(2048, 3, activation='relu', padding='same', kernel_initializer='he_normal')(conv5)
 
 
-        up6 = Conv2D(512, 2, activation='relu', padding='same', kernel_initializer='he_normal')(
+        up6 = Conv2D(1024, 2, activation='relu', padding='same', kernel_initializer='he_normal')(
             UpSampling2D(size=(2, 2))(conv5))
         merge6 = merge([conv4, up6], mode='concat', concat_axis=3)
-        conv6 = Conv2D(512, 3, activation='relu', padding='same', kernel_initializer='he_normal')(merge6)
-        conv6 = Conv2D(512, 3, activation='relu', padding='same', kernel_initializer='he_normal')(conv6)
+        conv6 = Conv2D(1024, 3, activation='relu', padding='same', kernel_initializer='he_normal')(merge6)
+        conv6 = Conv2D(1024, 3, activation='relu', padding='same', kernel_initializer='he_normal')(conv6)
 
-        up7 = Conv2D(256, 2, activation='relu', padding='same', kernel_initializer='he_normal')(
+        up7 = Conv2D(512, 2, activation='relu', padding='same', kernel_initializer='he_normal')(
             UpSampling2D(size=(2, 2))(conv6))
         merge7 = merge([conv3, up7], mode='concat', concat_axis=3)
-        conv7 = Conv2D(256, 3, activation='relu', padding='same', kernel_initializer='he_normal')(merge7)
-        conv7 = Conv2D(256, 3, activation='relu', padding='same', kernel_initializer='he_normal')(conv7)
+        conv7 = Conv2D(512, 3, activation='relu', padding='same', kernel_initializer='he_normal')(merge7)
+        conv7 = Conv2D(512, 3, activation='relu', padding='same', kernel_initializer='he_normal')(conv7)
 
-        up8 = Conv2D(128, 2, activation='relu', padding='same', kernel_initializer='he_normal')(
+        up8 = Conv2D(256, 2, activation='relu', padding='same', kernel_initializer='he_normal')(
             UpSampling2D(size=(2, 2))(conv7))
         merge8 = merge([conv2, up8], mode='concat', concat_axis=3)
-        conv8 = Conv2D(128, 3, activation='relu', padding='same', kernel_initializer='he_normal')(merge8)
-        conv8 = Conv2D(128, 3, activation='relu', padding='same', kernel_initializer='he_normal')(conv8)
+        conv8 = Conv2D(256, 3, activation='relu', padding='same', kernel_initializer='he_normal')(merge8)
+        conv8 = Conv2D(256, 3, activation='relu', padding='same', kernel_initializer='he_normal')(conv8)
 
-        up9 = Conv2D(64, 2, activation='relu', padding='same', kernel_initializer='he_normal')(
+        up9 = Conv2D(128, 2, activation='relu', padding='same', kernel_initializer='he_normal')(
             UpSampling2D(size=(2, 2))(conv8))
         merge9 = merge([conv1, up9], mode='concat', concat_axis=3)
-        conv9 = Conv2D(64, 3, activation='relu', padding='same', kernel_initializer='he_normal')(merge9)
-        conv9 = Conv2D(64, 3, activation='relu', padding='same', kernel_initializer='he_normal')(conv9)
-        conv9 = Conv2D(64, 3, activation='relu', padding='same', kernel_initializer='he_normal')(conv9)
+        conv9 = Conv2D(128, 3, activation='relu', padding='same', kernel_initializer='he_normal')(merge9)
+        conv9 = Conv2D(128, 3, activation='relu', padding='same', kernel_initializer='he_normal')(conv9)
+        conv9 = Conv2D(128, 3, activation='relu', padding='same', kernel_initializer='he_normal')(conv9)
         conv10 = Conv2D(1, 1, activation='sigmoid')(conv9)
 
         model = Model(input=inputs, output=conv10)
@@ -100,8 +100,8 @@ class myUnet(object):
         print('Fitting model...')
         # model.fit(imgs_train, imgs_mask_train, batch_size=4, nb_epoch=10, verbose=1, validation_split=0.2, shuffle=True,
         #           callbacks=[model_checkpoint])
-        callback = model.fit_generator(training_generator, validation_data=validation_generator, steps_per_epoch=100,
-                                       epochs=1, max_queue_size=50, validation_steps=10)
+        callback = model.fit_generator(training_generator, validation_data=validation_generator, steps_per_epoch=50,
+                                       epochs=1, max_queue_size=50, validation_steps=5)
 
         self.current_loss = float(callback.history['loss'][0])
         print("current_loss: {}").format(self.current_loss)
