@@ -96,33 +96,34 @@ class myUnet(object):
         model = self.get_unet()
         print("got unet")
 
-        model_checkpoint = ModelCheckpoint('unet.hdf5', monitor='loss', verbose=1, save_best_only=True)
-        print('Fitting model...')
-        # model.fit(imgs_train, imgs_mask_train, batch_size=4, nb_epoch=10, verbose=1, validation_split=0.2, shuffle=True,
-        #           callbacks=[model_checkpoint])
-        callback = model.fit_generator(training_generator, validation_data=validation_generator, steps_per_epoch=100,
-                                       epochs=1, max_queue_size=50, validation_steps=10)
+        while True:
+            model_checkpoint = ModelCheckpoint('unet.hdf5', monitor='loss', verbose=1, save_best_only=True)
+            print('Fitting model...')
+            # model.fit(imgs_train, imgs_mask_train, batch_size=4, nb_epoch=10, verbose=1, validation_split=0.2, shuffle=True,
+            #           callbacks=[model_checkpoint])
+            callback = model.fit_generator(training_generator, validation_data=validation_generator, steps_per_epoch=100,
+                                           epochs=1, max_queue_size=50, validation_steps=10)
 
-        self.current_loss = float(callback.history['loss'][0])
-        print("current_loss: {}").format(self.current_loss)
+            self.current_loss = float(callback.history['loss'][0])
+            print("current_loss: {}").format(self.current_loss)
 
-        if self.current_loss < self.lowest_loss - 0.02:
-            weightfolder = 'savedmodels_unet_8/titletraining_weightsatloss_{0:.2f}'.format(self.current_loss)
-            if not os.path.isdir(weightfolder):
-                os.makedirs(weightfolder)
-            print('Saving {}/weights.h5'.format(weightfolder))
-            model.save_weights(weightfolder + '/weights.h5')
-            open(weightfolder + '/model.json', 'w').write(model.to_json())
-            # picklefile = open(weightfolder + '/indices.pickle', 'wb')
-            # pickle.dump((char_to_index, index_to_char, first_char_probs), picklefile)  ## what needs to go here??
-            # picklefile.close()
-            self.lowest_loss = self.current_loss
+            if self.current_loss < self.lowest_loss - 0.02:
+                weightfolder = 'savedmodels_unet_8/titletraining_weightsatloss_{0:.2f}'.format(self.current_loss)
+                if not os.path.isdir(weightfolder):
+                    os.makedirs(weightfolder)
+                print('Saving {}/weights.h5'.format(weightfolder))
+                model.save_weights(weightfolder + '/weights.h5')
+                open(weightfolder + '/model.json', 'w').write(model.to_json())
+                # picklefile = open(weightfolder + '/indices.pickle', 'wb')
+                # pickle.dump((char_to_index, index_to_char, first_char_probs), picklefile)  ## what needs to go here??
+                # picklefile.close()
+                self.lowest_loss = self.current_loss
 
 
 
-        #print('predict test data')
-        #imgs_mask_test = model.predict(imgs_test, batch_size=1, verbose=1)
-        #np.save('../results/imgs_mask_test.npy', imgs_mask_test)
+            #print('predict test data')
+            #imgs_mask_test = model.predict(imgs_test, batch_size=1, verbose=1)
+            #np.save('../results/imgs_mask_test.npy', imgs_mask_test)
 
     def save_img(self):
         print("array to image")

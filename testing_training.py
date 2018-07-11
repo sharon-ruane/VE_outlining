@@ -40,9 +40,9 @@ size_to_resize_to = (64,64)
 training_generator = emb_image_batch_generator(data_folder, train_emb_list, batch_size, size_to_resize_to, opt_z_stack_dict)
 validation_generator = emb_image_batch_generator(data_folder, val_emb_list, batch_size, size_to_resize_to, opt_z_stack_dict)
 # #
+
 sharon_unet = myUnet(lowest_loss=2)
-while True:
-    sharon_unet.train(training_generator, validation_generator)
+sharon_unet.train(training_generator, validation_generator)
 
 
 
