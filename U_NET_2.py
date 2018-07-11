@@ -12,7 +12,7 @@ from PIL import Image
 
 
 class myUnet(object):
-    def __init__(self, img_rows=80, img_cols=80, lowest_loss=2):
+    def __init__(self, img_rows=64, img_cols=64, lowest_loss=2):
         self.img_rows = img_rows
         self.img_cols = img_cols
         self.lowest_loss = lowest_loss

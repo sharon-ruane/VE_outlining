@@ -56,9 +56,9 @@ def emb_image_batch_generator(data_folder, emb_list, batch_size, size_to_resize_
                     else:
                         pixdata[x, y] = (255, 255, 255)
 
-            #rotations = random.randint(0, 360)
-            #emb_raw_image = emb_raw_image.rotate(rotations)
-            #emb_outlines_image = emb_outlines_image.rotate(rotations)
+            rotations = random.randint(0, 360)
+            emb_raw_image = emb_raw_image.rotate(rotations)
+            emb_outlines_image = emb_outlines_image.rotate(rotations)
 
             binary_outlines = emb_outlines_image.convert("1")
             usable_outlines = binary_outlines.convert("L")
@@ -70,7 +70,7 @@ def emb_image_batch_generator(data_folder, emb_list, batch_size, size_to_resize_
 
             counter = 0
             while counter < 5 and len(image_section_batch) < batch_size:
-                y = random.randint(45, 60)
+                y = random.randint(50, 64)
                 if binary_outlines_arr.any():
                     check_box = overlap_box(auto_bounding_box_pixels, center_bit)
                 else:
@@ -98,30 +98,27 @@ def emb_image_batch_generator(data_folder, emb_list, batch_size, size_to_resize_
                 if all(x) == True:
                     #log.info("Successful crop --- Adding to batch!")
                     crop_emb_raw_image = emb_raw_image.crop(box=b_box)
-                    crop_emb_raw_image_arr = np.asarray(crop_emb_raw_image.resize((80, 80))).reshape(80, 80, 1)
+                    crop_emb_raw_image_arr = np.asarray(crop_emb_raw_image.resize((64, 64))).reshape(64, 64, 1)
+                    #Image.fromarray(crop_emb_raw_image_arr.reshape(64, 64)).show()
 
-                    #Image.fromarray(crop_emb_raw_image_arr.reshape(80, 80)).show()
-                    image_section_batch.append(crop_emb_raw_image_arr/255)
-                    # crop_emb_outlines_image = binary_outlines.crop(box=b_box)
+                    image_section_batch.append(crop_emb_raw_image_arr/float(255))
+                    #crop_emb_outlines_image = binary_outlines.crop(box=b_box)
                     crop_emb_outlines_image = usable_outlines.crop(box=b_box)
-                    crop_emb_outlines_image_arr = np.asarray(crop_emb_outlines_image.resize((80, 80))).reshape(80,80, 1)
-                    # crop_emb_outlines_image_arr = np.asarray(crop_emb_outlines_image.resize((80, 80))).reshape(80, 80, 1)
-                    #Image.fromarray(crop_emb_outlines_image_arr.reshape(80, 80)).show()
+                    crop_emb_outlines_image_arr = np.asarray(crop_emb_outlines_image.resize((64, 64))).reshape(64,64, 1)
+                     # crop_emb_outlines_image_arr = np.asarray(crop_emb_outlines_image.resize((80, 80))).reshape(80, 80, 1)
+                    #Image.fromarray(crop_emb_outlines_image_arr.reshape(64, 64)).show()
                     #crop_emb_outlines_image.show()
-                    pixel_labels_batch.append(crop_emb_outlines_image_arr/255)
+                    pixel_labels_batch.append(1-(crop_emb_outlines_image_arr/float(255)))
                 counter += 1
 
 
-        yield (np.asarray(image_section_batch), np.asarray(pixel_labels_batch))
+        yield np.asarray(image_section_batch), np.asarray(pixel_labels_batch)
 
 
 
 
-
-
-
-
-
+#
+#
 
 
 
@@ -174,8 +171,8 @@ def make_test_batch(test_emb_folder, test_batch_size, opt_z_stack_dict):
                       (emb_outlines_image.size[0] // 4) * 3, (emb_outlines_image.size[1] // 4) * 3)
 
         counter = 0
-        while counter < 10 and len(test_batch) < test_batch_size:
-            y = 80
+        while counter < 5 and len(test_batch) < test_batch_size:
+            y = 64
 
             if binary_outlines_arr.any():
                 check_box = overlap_box(auto_bounding_box_pixels, center_bit)
@@ -203,8 +200,44 @@ def make_test_batch(test_emb_folder, test_batch_size, opt_z_stack_dict):
             if all(x) == True:
                 # log.info("Successful crop --- Adding to batch!")
                 crop_emb_raw_image = emb_raw_image.crop(box=b_box)
-                test_batch.append(np.asarray(crop_emb_raw_image.resize((80, 80))).reshape(80, 80, 1)) # this has gotta go in the net
+                crop_emb_raw_image_arr = np.asarray(crop_emb_raw_image.resize((64, 64))).reshape(64, 64, 1)
+                test_batch.append(crop_emb_raw_image_arr / float(255)) # this has gotta go in the net
                 crop_emb_outlines_image = emb_outlines_image.crop(box=b_box)
                 ground_truth.append(np.asarray(crop_emb_outlines_image))  # just want pic here
             counter += 1
-    return test_batch, ground_truth
+    return np.asarray(test_batch), ground_truth
+
+#
+#
+# model_dir = "/home/iolie/PycharmProjects/THESIS/savedmodels_unet_5/titletraining_weightsatloss_0.69"
+# data_folder = "/home/iolie/PhD_Thesis_Data/epithelial_cell_border_identification"
+# emb_list = os.listdir(data_folder)
+# #print(emb_list)
+# emb_list.remove('.DS_Store')
+# randoms = random.sample(emb_list, 2)
+#
+#
+# opt_z_stack_dict = {}
+# opt_z_stack_dict["AAntnew33-47.lsm (cropped)"] = 3
+# opt_z_stack_dict["ANTERIOR \"EMB 4\" Nov. 28th Emb (2)_L5_Sum.lsm (spliced)"] = 3
+# opt_z_stack_dict["Anterior = Embryo 5\" Feb 20th"] = 4
+# opt_z_stack_dict["USEAnt(potential)2_march__t2.lsm (spliced) (cropped)"] = 3
+# opt_z_stack_dict["LATERAL \"EMB 3\" Oct 2nd Emb (1)_L3_Sum.lsm (spliced)"] = 3
+# opt_z_stack_dict["LATERAL\"EMB 6\" Nov. 28th Emb (2)_L7_Sum.lsm "] = 3
+# opt_z_stack_dict["LATERAL \"EMB 9\" Dec 15th Emb (1)_L12_Sum.lsm (spliced)"] = 4
+# opt_z_stack_dict["LATERAL \"EMB 12\" Nov. 28th Emb (2)_L12_Sum.lsm "] = 4
+# opt_z_stack_dict["Outline this movie tp 6-22 posterior copy"] = 5
+# opt_z_stack_dict["POSTERIOR = \"Embryo 2\", Nov. 28th Emb (2)_L3_Sum.lsm (spliced)"] = 3
+# opt_z_stack_dict["EARLY Posterior = \"Embryo 6\", Feb. 20th Emb (1)_L6_Sum.lsm (spliced)"] = 3
+# opt_z_stack_dict["LATE Posterior = \"Embryo 6\", Feb. 20th Emb (1)_L6_Sum.lsm (spliced)"] = 4
+#
+# # x = make_test_batch(data_folder, 3, opt_z_stack_dict)
+# # a, b = x.next()
+#
+# x = emb_image_batch_generator(data_folder, emb_list, 2, (64,64), opt_z_stack_dict)
+# a, b = x.next()
+#
+#
+#
+# pass
+#

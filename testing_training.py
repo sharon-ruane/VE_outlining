@@ -6,7 +6,7 @@ from U_NET import myUnet ############### careful!
 from keras.models import model_from_json
 from U_NET_training_functions import emb_image_batch_generator, make_test_batch
 
-model_dir = "/home/iolie/PycharmProjects/THESIS/savedmodels_unet_5/titletraining_weightsatloss_0.69"
+model_dir = "/home/iolie/PycharmProjects/THESIS/savedmodels_unet_8/titletraining_weightsatloss_0.47"
 data_folder = "/home/iolie/PhD_Thesis_Data/epithelial_cell_border_identification"
 emb_list = os.listdir(data_folder)
 #print(emb_list)
@@ -33,56 +33,70 @@ opt_z_stack_dict["POSTERIOR = \"Embryo 2\", Nov. 28th Emb (2)_L3_Sum.lsm (splice
 opt_z_stack_dict["EARLY Posterior = \"Embryo 6\", Feb. 20th Emb (1)_L6_Sum.lsm (spliced)"] = 3
 opt_z_stack_dict["LATE Posterior = \"Embryo 6\", Feb. 20th Emb (1)_L6_Sum.lsm (spliced)"] = 4
 
-batch_size = 2 ###
-size_to_resize_to = (80,80)
+batch_size = 128
+size_to_resize_to = (64,64)
 
-## need to sep out the lists -- allocate 2 for validation
+#  ## need to sep out the lists -- allocate 2 for validation
 training_generator = emb_image_batch_generator(data_folder, train_emb_list, batch_size, size_to_resize_to, opt_z_stack_dict)
 validation_generator = emb_image_batch_generator(data_folder, val_emb_list, batch_size, size_to_resize_to, opt_z_stack_dict)
-#
+# #
 sharon_unet = myUnet(lowest_loss=2)
 while True:
     sharon_unet.train(training_generator, validation_generator)
-# # #
-# # test_embs = "/home/iolie/PhD_Thesis_Data/epithelial_cell_border_test_embs"
-# # test_batch_size = 5
-# # test_batch, ground_truth = make_test_batch(test_embs, test_batch_size, opt_z_stack_dict)
-# # for pic in test_batch:
-# #     img = Image.fromarray(pic.reshape(80,80))
-# #     img.show()
-# #
-# # for pic in ground_truth:
-# #     img = Image.fromarray(pic)
-# #     img.show()
-# #
-# #
-# # json_file = open(os.path.join(model_dir, "model.json"), 'r')
-# # loaded_model_json = json_file.read()
-# # json_file.close()
-# # model = model_from_json(loaded_model_json)
-# # model.load_weights(os.path.join(model_dir, "weights.h5"))
-# # print("Loaded model from disk")
-# #
-# # print(test_batch[0].shape)
-# # outlines_test = model.predict(np.asarray(test_batch)/255, batch_size=5, verbose=1, steps=None)
-# # #
-# # print(outlines_test.shape)
-# #
-# # for i in range(outlines_test.shape[0]):
-# #     pred = outlines_test[i]
-# #     mask = pred.reshape(80, 80)
-# #     mask = mask
-# #     print(pred)
-# #     mask[mask > 0.4] = 255
-# #     mask[mask <= 0.4] = 0
-# #     imgr = Image.fromarray(mask)
-# #     imgr.show()
-# #
-# #
-# #
-# #
+
+
+
+
 #
 #
+# test_embs = "/home/iolie/PhD_Thesis_Data/epithelial_cell_border_test_embs"
+# test_batch_size = 2
+# test_batch, ground_truth = make_test_batch(test_embs, test_batch_size, opt_z_stack_dict)
+# for pic in test_batch:
+#     img = Image.fromarray((pic*255).reshape(64,64))
+#     img.show()
+# # #
+# for pic in ground_truth:
+#     img = Image.fromarray(pic)
+#     img.show()
+# #
+# #
+# json_file = open(os.path.join(model_dir, "model.json"), 'r')
+# loaded_model_json = json_file.read()
+# json_file.close()
+# model = model_from_json(loaded_model_json)
+# model.load_weights(os.path.join(model_dir, "weights.h5"))
+# print("Loaded model from disk")
+#
+# print(test_batch[0].shape)
+# outlines_test = model.predict(test_batch, batch_size=5, verbose=1, steps=None)
+# #
+# print(outlines_test.shape)
+# #
+# for i in range(outlines_test.shape[0]):
+#     pred = outlines_test[i]
+#     #print(pred)
+#     mask = (pred).reshape(64, 64)
+#     print(mask)
+#     print(np.min(mask))
+#     imgx = Image.fromarray(mask*255)
+#     imgx.show()
+#
+#     mask[mask > 0.85] = 255
+#     mask[mask <= 0.85] = 0
+#
+#     imgr = Image.fromarray(mask)
+#     imgr.show()
+#
+
+
+
+
+
+
+
+
+
 #
 # """
 # while True:
