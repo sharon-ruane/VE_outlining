@@ -12,12 +12,13 @@ from PIL import Image
 
 
 class myUnet(object):
-    def __init__(self, img_rows=64, img_cols=64, lowest_loss=2):
+    def __init__(self, model_save_dir, img_rows=64, img_cols=64, lowest_loss=2):
+        print ("THIS IS UNET 2")
         self.img_rows = img_rows
         self.img_cols = img_cols
         self.lowest_loss = lowest_loss
         self.current_loss = None
-
+        self.model_save_dir = model_save_dir
 
     # def load_data(self):
     #     mydata = dataProcess(self.img_rows, self.img_cols)
@@ -121,7 +122,9 @@ class myUnet(object):
             print("current_loss: {}").format(self.current_loss)
 
             if self.current_loss < self.lowest_loss - 0.02:
-                weightfolder = 'savedmodels_unet_14/titletraining_weightsatloss_{0:.2f}'.format(self.current_loss)
+                weightfolder = os.path.join(self.model_save_dir,
+                                            'titletraining_weightsatloss_{0:.2f}'.format(
+                                                self.current_loss))
                 if not os.path.isdir(weightfolder):
                     os.makedirs(weightfolder)
                 print('Saving {}/weights.h5'.format(weightfolder))

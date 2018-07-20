@@ -8,7 +8,7 @@ from U_NET_4 import myUnet as myUnet4
 from U_NET_TRAINING_2 import emb_image_batch_generator
 
 
-def train_me(data_folder, train_emb_list, val_emb_list, opt_z_stack_dict,
+def train_me(data_folder, train_emb_list, val_emb_list, opt_z_stack_dict, model_save_dir,
              batch_size=32, size_to_resize_to=(96,96), unet_to_load=1):
     training_generator = emb_image_batch_generator(data_folder, train_emb_list,
                                                    batch_size,
@@ -19,20 +19,24 @@ def train_me(data_folder, train_emb_list, val_emb_list, opt_z_stack_dict,
                                                      size_to_resize_to,
                                                      opt_z_stack_dict)
     if unet_to_load == 1:
-        unet = myUnet1(lowest_loss=2, img_rows=size_to_resize_to[0],
+        unet = myUnet1(model_save_dir, lowest_loss=2,
+                       img_rows=size_to_resize_to[0],
                        img_cols=size_to_resize_to[1])
         unet.train(training_generator, validation_generator)
     if unet_to_load == 2:
-        unet = myUnet2(lowest_loss=2, img_rows=size_to_resize_to[0],
+        unet = myUnet2(model_save_dir, lowest_loss=2,
+                       img_rows=size_to_resize_to[0],
                        img_cols=size_to_resize_to[1])
         unet.train(training_generator, validation_generator)
     if unet_to_load == 3:
-        unet = myUnet3(lowest_loss=2, img_rows=size_to_resize_to[0],
+        unet = myUnet3(model_save_dir, lowest_loss=2,
+                       img_rows=size_to_resize_to[0],
                        img_cols=size_to_resize_to[1])
         unet.train(training_generator, validation_generator)
     if unet_to_load == 4:
-        unet = myUnet4(lowest_loss=2, img_rows=size_to_resize_to[0],
-                        img_cols=size_to_resize_to[1])
+        unet = myUnet4(model_save_dir, lowest_loss=2,
+                       img_rows=size_to_resize_to[0],
+                       img_cols=size_to_resize_to[1])
         unet.train(training_generator, validation_generator)
 
 def test_me(image_folder):

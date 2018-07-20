@@ -27,6 +27,8 @@ _Z_STACK = {
     "LATE Posterior = \"Embryo 6\", Feb. 20th Emb (1)_L6_Sum.lsm (spliced)": 4
 }
 
+model_save_dir = 'savedmodels_unet_15'
+
 emb_list = [x for x in os.listdir(data_folder) if os.path.isdir(os.path.join(data_folder, x))]
 # randoms = random.sample(emb_list, 1)
 val_emb_list = [emb_list[0], emb_list[5]]
@@ -36,8 +38,8 @@ def main(args=None, train=True, test=False):
     #input_path = os.path.abspath(args.input_dir)
     if train:
         tt.train_me(data_folder, train_emb_list, val_emb_list, _Z_STACK,
-                    batch_size=batch_size, size_to_resize_to=size_to_resize_to,
-                    unet_to_load=1)
+                    model_save_dir, batch_size=batch_size,
+                    size_to_resize_to=size_to_resize_to, unet_to_load=2)
     if test:
         tt.test_me()
 
