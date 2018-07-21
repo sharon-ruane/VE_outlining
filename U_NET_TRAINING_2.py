@@ -70,8 +70,8 @@ def emb_image_batch_generator(data_folder, emb_list, batch_size, rsz, opt_z_stac
             emb_outlines_image = emb_outlines_image.crop(box=emb_side)
 
             pixdata = emb_outlines_image.load()
-            for y in xrange(emb_outlines_image.size[1]):
-                for x in xrange(emb_outlines_image.size[0]):
+            for y in range(emb_outlines_image.size[1]):
+                for x in range(emb_outlines_image.size[0]):
                     [r, g, b] = pixdata[x, y]
                     if (max(r, g, b) - min(r, g, b)) < 80:  ## trial and error = best fit
                         pixdata[x, y] = (0, 0, 0)
@@ -131,92 +131,87 @@ def emb_image_batch_generator(data_folder, emb_list, batch_size, rsz, opt_z_stac
 
 
 
+def make_test_batch(test_emb_folder, test_batch_size, rsz, opt_z_stack_dict):
+    test_batch = []
+    ground_truth = []
+    test_emb_list = os.listdir(test_emb_folder)
 
+    while len(test_batch) < test_batch_size:
+        emb_choice = random.choice(test_emb_list)
+        timepoints = []
+        for file in os.listdir(os.path.join(test_emb_folder, emb_choice)):
+            if file.startswith('T'):
+                timepoints.append(os.path.join(test_emb_folder, emb_choice, file))
+        opt_z = opt_z_stack_dict[emb_choice]
+        timepoint = random.choice(timepoints)
+        time_split = timepoint.split("/")[-1]
+        image_needed = time_split + "C02" + "Z00" + str(opt_z) + ".tif"
 
-#
-#
-#
-# def make_test_batch(test_emb_folder, test_batch_size, rsz, opt_z_stack_dict):
-#     test_batch = []
-#     ground_truth = []
-#     test_emb_list = os.listdir(test_emb_folder)
-#
-#     while len(test_batch) < test_batch_size:
-#         emb_choice = random.choice(test_emb_list)
-#         timepoints = []
-#         for file in os.listdir(os.path.join(test_emb_folder, emb_choice)):
-#             if file.startswith('T'):
-#                 timepoints.append(os.path.join(test_emb_folder, emb_choice, file))
-#         opt_z = opt_z_stack_dict[emb_choice]
-#         timepoint = random.choice(timepoints)
-#         time_split = timepoint.split("/")[-1]
-#         image_needed = time_split + "C02" + "Z00" + str(opt_z) + ".tif"
-#
-#         emb_raw_image = Image.open(os.path.join(timepoint, image_needed)).convert("L")
-#         outlines_poss_multiple = []
-#         for file in os.listdir(timepoint):
-#             if file.startswith('xCell'):
-#                 outlines_poss_multiple.append(file)
-#
-#         emb_outlines_image = Image.open(os.path.join(timepoint, random.choice(outlines_poss_multiple)))
-#
-#         pixdata = emb_outlines_image.load()
-#         for y in xrange(emb_outlines_image.size[1]):
-#             for x in xrange(emb_outlines_image.size[0]):
-#                 [r, g, b] = pixdata[x, y]
-#                 if (max(r, g, b) - min(r, g, b)) < 80:  ## trial and error = best fit
-#                     pixdata[x, y] = (0, 0, 0)
-#                 else:
-#                     pixdata[x, y] = (255, 255, 255)
-#
-#         rotations = random.randint(0, 360)
-#         emb_raw_image = emb_raw_image.rotate(rotations)
-#         emb_outlines_image = emb_outlines_image.rotate(rotations)
-#
-#         binary_outlines = emb_outlines_image.convert("1")
-#
-#         binary_outlines_arr = np.asarray(binary_outlines)
-#
-#         auto_bounding_box_pixels = emb_outlines_image.getbbox()
-#         center_bit = ((emb_outlines_image.size[0] // 4), (emb_outlines_image.size[1] // 4),
-#                       (emb_outlines_image.size[0] // 4) * 3, (emb_outlines_image.size[1] // 4) * 3)
-#
-#         counter = 0
-#         while counter < 5 and len(test_batch) < test_batch_size:
-#             y = rsz[0]
-#
-#             if binary_outlines_arr.any():
-#                 check_box = overlap_box(auto_bounding_box_pixels, center_bit)
-#             else:
-#                 check_box = center_bit
-#                 log.error("Image is too small")
-#
-#             if y >= check_box[2] - check_box[0]:
-#                 check_box = center_bit
-#                 pass
-#             if y >= check_box[3] - check_box[1]:
-#                 check_box = center_bit
-#                 pass
-#
-#             crop_im, b_box = crop_image_in_special_box(emb_outlines_image, check_box, (y, y))
-#
-#             w_range = range(b_box[0], b_box[2])
-#             h_range = range(b_box[1], b_box[3])
-#             bb_w1_pixels = [binary_outlines_arr[(b_box[1]), i] for i in w_range]
-#             bb_w2_pixels = [binary_outlines_arr[(b_box[3]), i] for i in w_range]
-#             bb_h1_pixels = [binary_outlines_arr[(i, b_box[0])] for i in h_range]
-#             bb_h2_pixels = [binary_outlines_arr[(i, b_box[2])] for i in h_range]
-#
-#             x = [any(bb_w1_pixels), any(bb_w2_pixels), any(bb_h1_pixels), any(bb_h2_pixels)]
-#             if all(x) == True:
-#                 # log.info("Successful crop --- Adding to batch!")
-#                 crop_emb_raw_image = emb_raw_image.crop(box=b_box)
-#                 crop_emb_raw_image_arr = np.asarray(crop_emb_raw_image.resize((rsz[0], rsz[1]))).reshape(rsz[0], rsz[1], 1)
-#                 test_batch.append(crop_emb_raw_image_arr / float(255)) # this has gotta go in the net
-#                 crop_emb_outlines_image = emb_outlines_image.crop(box=b_box)
-#                 ground_truth.append(np.asarray(crop_emb_outlines_image))  # just want pic here
-#             counter += 1
-#     return np.asarray(test_batch), ground_truth
+        emb_raw_image = Image.open(os.path.join(timepoint, image_needed)).convert("L")
+        outlines_poss_multiple = []
+        for file in os.listdir(timepoint):
+            if file.startswith('xCell'):
+                outlines_poss_multiple.append(file)
+
+        emb_outlines_image = Image.open(os.path.join(timepoint, random.choice(outlines_poss_multiple)))
+
+        pixdata = emb_outlines_image.load()
+        for y in range(emb_outlines_image.size[1]):
+            for x in range(emb_outlines_image.size[0]):
+                [r, g, b] = pixdata[x, y]
+                if (max(r, g, b) - min(r, g, b)) < 80:  ## trial and error = best fit
+                    pixdata[x, y] = (0, 0, 0)
+                else:
+                    pixdata[x, y] = (255, 255, 255)
+
+        rotations = random.randint(0, 360)
+        emb_raw_image = emb_raw_image.rotate(rotations)
+        emb_outlines_image = emb_outlines_image.rotate(rotations)
+
+        binary_outlines = emb_outlines_image.convert("1")
+
+        binary_outlines_arr = np.asarray(binary_outlines)
+
+        auto_bounding_box_pixels = emb_outlines_image.getbbox()
+        center_bit = ((emb_outlines_image.size[0] // 4), (emb_outlines_image.size[1] // 4),
+                      (emb_outlines_image.size[0] // 4) * 3, (emb_outlines_image.size[1] // 4) * 3)
+
+        counter = 0
+        while counter < 5 and len(test_batch) < test_batch_size:
+            y = rsz[0]
+
+            if binary_outlines_arr.any():
+                check_box = overlap_box(auto_bounding_box_pixels, center_bit)
+            else:
+                check_box = center_bit
+                log.error("Image is too small")
+
+            if y >= check_box[2] - check_box[0]:
+                check_box = center_bit
+                pass
+            if y >= check_box[3] - check_box[1]:
+                check_box = center_bit
+                pass
+
+            crop_im, b_box = crop_image_in_special_box(emb_outlines_image, check_box, (y, y))
+
+            w_range = range(b_box[0], b_box[2])
+            h_range = range(b_box[1], b_box[3])
+            bb_w1_pixels = [binary_outlines_arr[(b_box[1]), i] for i in w_range]
+            bb_w2_pixels = [binary_outlines_arr[(b_box[3]), i] for i in w_range]
+            bb_h1_pixels = [binary_outlines_arr[(i, b_box[0])] for i in h_range]
+            bb_h2_pixels = [binary_outlines_arr[(i, b_box[2])] for i in h_range]
+
+            x = [any(bb_w1_pixels), any(bb_w2_pixels), any(bb_h1_pixels), any(bb_h2_pixels)]
+            if all(x) == True:
+                # log.info("Successful crop --- Adding to batch!")
+                crop_emb_raw_image = emb_raw_image.crop(box=b_box)
+                crop_emb_raw_image_arr = np.asarray(crop_emb_raw_image.resize((rsz[0], rsz[1]))).reshape(rsz[0], rsz[1], 1)
+                test_batch.append(crop_emb_raw_image_arr / float(255)) # this has gotta go in the net
+                crop_emb_outlines_image = emb_outlines_image.crop(box=b_box)
+                ground_truth.append(np.asarray(crop_emb_outlines_image))  # just want pic here
+            counter += 1
+    return np.asarray(test_batch), ground_truth
 
 #
 #

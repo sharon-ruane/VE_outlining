@@ -2,3 +2,4 @@ env/
 savedmodels_*
 .idea/
 *.pyc
+*.txt

@@ -9,9 +9,10 @@ batch_size = 32
 size_to_resize_to = (80, 80)
 data_folder = "/home/iolie/PhD_Thesis_Data/epithelial_cell_border_identification"
 
-model_dir = "/home/iolie/PycharmProjects/THESIS/savedmodels_unet_12/titletraining_weightsatloss_0.28"
+model_dir = "/home/iolie/PycharmProjects/THESIS/savedmodels_unet_15/"
 image_folder = "/home/iolie/Desktop/THESIS IMAGES/"
 test_embs = "/home/iolie/PhD_Thesis_Data/epithelial_cell_border_test_embs"
+
 _Z_STACK = {
     "AAntnew33-47.lsm (cropped)": 3,
     "ANTERIOR \"EMB 4\" Nov. 28th Emb (2)_L5_Sum.lsm (spliced)": 3,
@@ -27,7 +28,7 @@ _Z_STACK = {
     "LATE Posterior = \"Embryo 6\", Feb. 20th Emb (1)_L6_Sum.lsm (spliced)": 4
 }
 
-model_save_dir = 'savedmodels_unet_15'
+model_save_dir = 'savedmodels_unet_16'
 
 emb_list = [x for x in os.listdir(data_folder) if os.path.isdir(os.path.join(data_folder, x))]
 # randoms = random.sample(emb_list, 1)
@@ -39,9 +40,10 @@ def main(args=None, train=True, test=False):
     if train:
         tt.train_me(data_folder, train_emb_list, val_emb_list, _Z_STACK,
                     model_save_dir, batch_size=batch_size,
-                    size_to_resize_to=size_to_resize_to, unet_to_load=2)
+                    size_to_resize_to=size_to_resize_to, unet_to_load=3)
     if test:
-        tt.test_me()
+        tt.test_me(image_folder, model_dir, test_embs, _Z_STACK,
+                   size_to_resize_to=size_to_resize_to)
 
 
 def parse_arguments():
@@ -53,4 +55,4 @@ def parse_arguments():
 if __name__ == '__main__':
     args = parse_arguments()
     #main(args)
-    main(train=True)
+    main(train=False, test=True)

@@ -1,3 +1,5 @@
+from keras.models import model_from_json
+import numpy as np
 import os
 from PIL import Image
 import uuid
@@ -5,7 +7,7 @@ from U_NET import myUnet as myUnet1
 from U_NET_2 import myUnet as myUnet2
 from U_NET_3 import myUnet as myUnet3
 from U_NET_4 import myUnet as myUnet4
-from U_NET_TRAINING_2 import emb_image_batch_generator
+from U_NET_TRAINING_2 import emb_image_batch_generator, make_test_batch
 
 
 def train_me(data_folder, train_emb_list, val_emb_list, opt_z_stack_dict, model_save_dir,
@@ -39,11 +41,11 @@ def train_me(data_folder, train_emb_list, val_emb_list, opt_z_stack_dict, model_
                        img_cols=size_to_resize_to[1])
         unet.train(training_generator, validation_generator)
 
-def test_me(image_folder):
+def test_me(image_folder, model_dir, test_data_path, opt_z_stack_dict, size_to_resize_to=(96, 96)):
     save_dir = os.path.join(image_folder, model_dir.split("/")[-2], model_dir.split("/")[-1])
     rsz = size_to_resize_to
     test_batch_size = 10
-    test_batch, ground_truth = make_test_batch(test_embs, test_batch_size, size_to_resize_to, opt_z_stack_dict)
+    test_batch, ground_truth = make_test_batch(test_data_path, test_batch_size, size_to_resize_to, opt_z_stack_dict)
     batch_id = str(uuid.uuid4())
     min_threshold = 0.2
     max_threshold = 0.8

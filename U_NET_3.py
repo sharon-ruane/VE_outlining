@@ -13,6 +13,7 @@ from PIL import Image
 
 class myUnet(object):
     def __init__(self, model_save_dir, img_rows=64, img_cols=64, lowest_loss=2):
+	print ("this is UNET 3")
         self.img_rows = img_rows
         self.img_cols = img_cols
         self.lowest_loss = lowest_loss
