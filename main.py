@@ -1,8 +1,10 @@
 import argparse
 import random
 import os
+from sklearn.model_selection import test_train_split
 
 import testing_training as tt
+from U_NET_training_functions import get_base_dataset
 
 
 batch_size = 32
@@ -27,18 +29,19 @@ _Z_STACK = {
     "EARLY Posterior = \"Embryo 6\", Feb. 20th Emb (1)_L6_Sum.lsm (spliced)": 3,
     "LATE Posterior = \"Embryo 6\", Feb. 20th Emb (1)_L6_Sum.lsm (spliced)": 4
 }
-
 model_save_dir = 'savedmodels_unet_16'
 
-emb_list = [x for x in os.listdir(data_folder) if os.path.isdir(os.path.join(data_folder, x))]
-# randoms = random.sample(emb_list, 1)
-val_emb_list = [emb_list[0], emb_list[5]]
-train_emb_list = [x for x in emb_list if x not in val_emb_list]
 
 def main(args=None, train=True, test=False):
     #input_path = os.path.abspath(args.input_dir)
+
+    data_folder = "/home/iolie/dev/thesis/epithelial_cell_border_identification"
+    dataset = get_base_dataset(data_folder)
+
+    #TODO: split the base dataset train/val/test
+
     if train:
-        tt.train_me(data_folder, train_emb_list, val_emb_list, _Z_STACK,
+        tt.train_me(data_folder, train_data, val_data,
                     model_save_dir, batch_size=batch_size,
                     size_to_resize_to=size_to_resize_to, unet_to_load=3)
     if test:
@@ -55,4 +58,4 @@ def parse_arguments():
 if __name__ == '__main__':
     args = parse_arguments()
     #main(args)
-    main(train=False, test=True)
+    main(train=True, test=False)
