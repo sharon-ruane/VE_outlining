@@ -7,6 +7,7 @@ from U_NET import myUnet as myUnet1
 from U_NET_2 import myUnet as myUnet2
 from U_NET_3 import myUnet as myUnet3
 from U_NET_4 import myUnet as myUnet4
+from U_NET_5 import myUnet as myUnet5
 from U_NET_training_functions import emb_image_batch_generator_v2
 
 def train_me(data_folder, train_emb_list, val_emb_list, model_save_dir,
@@ -38,6 +39,11 @@ def train_me(data_folder, train_emb_list, val_emb_list, model_save_dir,
         unet = myUnet4(model_save_dir, lowest_loss=2,
                        img_rows=size_to_resize_to[0],
                        img_cols=size_to_resize_to[1])
+        unet.train(training_generator, validation_generator)
+    if unet_to_load == 5:
+        unet = myUnet5(model_save_dir, lowest_loss=2,
+                        img_rows=size_to_resize_to[0],
+                        img_cols=size_to_resize_to[1])
         unet.train(training_generator, validation_generator)
 
 def test_me(image_folder, model_dir, test_data_path, opt_z_stack_dict, size_to_resize_to=(96, 96)):
