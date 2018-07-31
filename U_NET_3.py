@@ -13,7 +13,7 @@ from PIL import Image
 
 class myUnet(object):
     def __init__(self, model_save_dir, img_rows=64, img_cols=64, lowest_loss=2):
-	print ("this is UNET 3")
+        print ("this is UNET 3")
         self.img_rows = img_rows
         self.img_cols = img_cols
         self.lowest_loss = lowest_loss
@@ -117,10 +117,10 @@ class myUnet(object):
             # model.fit(imgs_train, imgs_mask_train, batch_size=4, nb_epoch=10, verbose=1, validation_split=0.2, shuffle=True,
             #           callbacks=[model_checkpoint])
             callback = model.fit_generator(training_generator, validation_data=validation_generator, steps_per_epoch=200,
-                                           epochs=1, max_queue_size=50, validation_steps=20)
+                                           epochs=1, max_queue_size=50, validation_steps=10)
 
             self.current_loss = float(callback.history['loss'][0])
-            print("current_loss: {}").format(self.current_loss)
+            print("current_loss: {}".format(self.current_loss))
 
             if self.current_loss < self.lowest_loss - 0.02:
                 weightfolder = os.path.join(self.model_save_dir,

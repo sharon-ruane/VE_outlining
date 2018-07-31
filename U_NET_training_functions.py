@@ -3,8 +3,8 @@ import numpy as np
 import os
 import random
 import time
-from PIL import ImageTk, Image
-import Tkinter as tk
+from PIL import ImageTk, Image, ImageOps
+import tkinter as tk
 
 log = logging.getLogger("")
 log.addHandler(logging.StreamHandler())
@@ -13,8 +13,8 @@ log.setLevel(logging.INFO)
 def color_outlines_to_bw(img):
     i = Image.open(img)
     pixdata = i.load()
-    for y in xrange(i.size[1]):
-        for x in xrange(i.size[0]):
+    for y in range(i.size[1]):
+        for x in range(i.size[0]):
             [r, g, b] = pixdata[x, y]
             if (max(r, g, b) - min(r, g,
                                    b)) < 80:  ## trial and error = best fit
@@ -23,26 +23,37 @@ def color_outlines_to_bw(img):
                 pixdata[x, y] = (255, 255, 255)
     return i
 
-def emb_image_batch_generator_v2(data_folder, emb_list, batch_size, rsz):
-    MIN_SIZE = 50
+def emb_image_batch_generator_v2(data_folder, emb_list, batch_size, rsz, MIN_SIZE=64):
     MAX_SIZE = rsz[0]
     while True:
         log.info("Spawning a new embryo image batch...")
         image_section_batch = []
         pixel_labels_batch = []
 
+        test_size = []
+
         while len(image_section_batch) < batch_size:
             emb_choice = random.choice(emb_list)
+
+
+            flip = random.choice([True, False])
+
             emb_raw_image = Image.open(emb_choice["raw_image"]).convert("L").crop(emb_choice["box_coords"])
+            if flip:
+                emb_raw_image = ImageOps.flip(emb_raw_image)
             rotations = random.randint(0, 360)
-            emb_raw_image = emb_raw_image.rotate(rotations, expand=True)
+            emb_raw_image = emb_raw_image.rotate(rotations, expand=True, resample=Image.BICUBIC)
+
             REQUIRED_SIZE = random.randint(MIN_SIZE, MAX_SIZE)
             if REQUIRED_SIZE > emb_raw_image.size[0] or REQUIRED_SIZE > emb_raw_image.size[1]:
-                #print ("IMAGE TOO SMALL")
                 continue
 
             emb_outlines_image = Image.open(emb_choice["bw_outline"]).crop(emb_choice["box_coords"])
-            emb_outlines_image = emb_outlines_image.rotate(rotations, expand=True)
+            if flip:
+                emb_outlines_image = ImageOps.flip(emb_outlines_image)
+            emb_outlines_image = emb_outlines_image.rotate(rotations, expand=True, resample=Image.BICUBIC)
+
+
             binary_outlines = emb_outlines_image.convert("1")
             binary_outlines_arr = np.asarray(binary_outlines).copy()
 
@@ -74,35 +85,38 @@ def emb_image_batch_generator_v2(data_folder, emb_list, batch_size, rsz):
 
                 th = 3 # proportion to divide the edges into to check crossing
                 x = [
-                    any(bb_w1_pixels[:len(bb_w1_pixels) / th]) and any(
-                        bb_w1_pixels[-len(bb_w1_pixels) / th:]),
-                    any(bb_w2_pixels[:len(bb_w2_pixels) / th]) and any(
-                        bb_w2_pixels[-len(bb_w2_pixels) / th:]),
-                    any(bb_h1_pixels[:len(bb_h1_pixels) / th]) and any(
-                        bb_h1_pixels[-len(bb_h1_pixels) / th:]),
-                    any(bb_h2_pixels[:len(bb_h2_pixels) / th]) and any(
-                        bb_h2_pixels[-len(bb_h2_pixels) / th:])
+                    any(bb_w1_pixels[:len(bb_w1_pixels) // th]) and any(
+                        bb_w1_pixels[-len(bb_w1_pixels) // th:]),
+                    any(bb_w2_pixels[:len(bb_w2_pixels) // th]) and any(
+                        bb_w2_pixels[-len(bb_w2_pixels) // th:]),
+                    any(bb_h1_pixels[:len(bb_h1_pixels) // th]) and any(
+                        bb_h1_pixels[-len(bb_h1_pixels) // th:]),
+                    any(bb_h2_pixels[:len(bb_h2_pixels) // th]) and any(
+                        bb_h2_pixels[-len(bb_h2_pixels) // th:])
                 ]
 
                 if all(x) == True:
                     crop_emb_raw_image = emb_raw_image.crop(box=b_box)
                     crop_emb_raw_image_arr = np.asarray(
-                        crop_emb_raw_image.resize((rsz[0], rsz[1]))).reshape(
+                        crop_emb_raw_image.resize((rsz[0], rsz[1]), Image.ANTIALIAS)).reshape(
                         rsz[0], rsz[1], 1)
 
                     image_section_batch.append(crop_emb_raw_image_arr / float(255))
+
                     crop_emb_outlines_image = emb_outlines_image.convert("L").crop(box=b_box)
                     crop_emb_outlines_image_arr = np.asarray(
-                        crop_emb_outlines_image.resize((rsz[0], rsz[1]))).reshape(
+                        crop_emb_outlines_image.resize((rsz[0], rsz[1]), Image.ANTIALIAS)).reshape(
                         rsz[0], rsz[1], 1)
-                    pixel_labels_batch.append(
-                        1 - (crop_emb_outlines_image_arr / float(255)))
+
+                    truefalse = crop_emb_outlines_image_arr > 155
+
+                    pixel_labels_batch.append(truefalse.astype(np.uint8))
                 fail_counter += 1
 
             #log.info("    couldnt find crossing in {} attempts:".format(fail_counter))
             #log.info("    for image: {}".format(fail_counter))
         yield np.asarray(image_section_batch), np.asarray(pixel_labels_batch)
-        #yield image_section_batch, pixel_labels_batch
+
 
 def get_base_dataset(data_folder, regenerate_bw=False):
     _Z_STACK = {
@@ -218,7 +232,7 @@ def get_base_dataset(data_folder, regenerate_bw=False):
                             #validation_count[test_im] = True
                         _ch = _cv[:, ch[0]:ch[1]]
                 else:
-                    print "stop"
+                    print ("stop")
                     pass
 
     print("dataset images valid: {}".format(len(bounding_boxes)))
@@ -227,9 +241,10 @@ def get_base_dataset(data_folder, regenerate_bw=False):
 
 if __name__ == '__main__':
     # test/show the generator in action
-    batch_size = 30
-    size_to_resize_to = (96, 96)
-    data_folder = "/home/iolie/dev/thesis/epithelial_cell_border_identification"
+    batch_size = 2
+    min_size = 80
+    size_to_resize_to = (256, 256)
+    data_folder = "/home/len/dev/thesis/epithelial_cell_border_identification"
     force_regenerate_bw_images = False  # set this to true to regenrate the saved outlines if the creation method changes
 
     dataset = get_base_dataset(data_folder, regenerate_bw=force_regenerate_bw_images)
@@ -237,7 +252,8 @@ if __name__ == '__main__':
             data_folder,
             dataset,
             batch_size,
-            size_to_resize_to)
+            size_to_resize_to,
+            MIN_SIZE=min_size)
 
     window = tk.Tk()
     window.title("data")
@@ -245,13 +261,14 @@ if __name__ == '__main__':
     window.configure(background='grey')
     canvas = tk.Canvas(window, width=2000, height=2000)
     while True:
-        res = training_generator.next()
+        res = next(training_generator)
         for i, r in enumerate(res[0]):
             a = Image.fromarray((r*255).reshape(size_to_resize_to[0], size_to_resize_to[1]))
             b = Image.fromarray((res[1][i] * 255).reshape(size_to_resize_to[0], size_to_resize_to[1]))
 
             img = ImageTk.PhotoImage(a)
             imgb = ImageTk.PhotoImage(b)
+
             canvas.delete("all")
             canvas.pack()
             canvas.create_image((512, 512), image=img, anchor="center")

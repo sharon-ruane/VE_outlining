@@ -119,7 +119,7 @@ class myUnet(object):
                                            epochs=1, max_queue_size=50, validation_steps=20)
 
             self.current_loss = float(callback.history['loss'][0])
-            print("current_loss: {}").format(self.current_loss)
+            print("current_loss: {}".format(self.current_loss))
 
             if self.current_loss < self.lowest_loss - 0.02:
                 weightfolder = os.path.join(self.model_save_dir,

@@ -10,15 +10,15 @@ from U_NET_4 import myUnet as myUnet4
 from U_NET_training_functions import emb_image_batch_generator_v2
 
 def train_me(data_folder, train_emb_list, val_emb_list, model_save_dir,
-             batch_size=32, size_to_resize_to=(96,96), unet_to_load=1):
+             batch_size=32, size_to_resize_to=(96,96), unet_to_load=1, min_size=50):
 
     # do the splitting
     training_generator = emb_image_batch_generator_v2(data_folder, train_emb_list,
                                                    batch_size,
-                                                   size_to_resize_to)
+                                                   size_to_resize_to, MIN_SIZE=min_size)
     validation_generator = emb_image_batch_generator_v2(data_folder, val_emb_list,
                                                      batch_size,
-                                                     size_to_resize_to)
+                                                     size_to_resize_to, MIN_SIZE=min_size)
     if unet_to_load == 1:
         unet = myUnet1(model_save_dir, lowest_loss=2,
                        img_rows=size_to_resize_to[0],
