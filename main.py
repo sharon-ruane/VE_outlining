@@ -7,19 +7,17 @@ from sklearn.model_selection import train_test_split
 import testing_training as tt
 from U_NET_training_functions import get_base_dataset
 
-
+min_size = 52
 batch_size = 6
-size_to_resize_to = (80, 80)
+size_to_resize_to = (96, 96)
 data_folder = "/home/iolie/PhD_Thesis_Data/epithelial_cell_border_identification"
 
 # WARNING THIS WILL OVERWRITE YOUR SAVE LIST OF INPUTS
 regenerate_test_split = False
 
-
-
-model_dir = "/home/iolie/PycharmProjects/THESIS/savedmodels_unet_15/"
-image_folder = "/home/iolie/Desktop/THESIS IMAGES/"
-test_embs = "/home/iolie/PhD_Thesis_Data/epithelial_cell_border_test_embs"
+#model_dir = "/home/iolie/PycharmProjects/THESIS/savedmodels_unet_15/"
+#image_folder = "/home/iolie/Desktop/THESIS IMAGES/"
+#test_embs = "/home/iolie/PhD_Thesis_Data/epithelial_cell_border_test_embs"
 
 _Z_STACK = {
     "AAntnew33-47.lsm (cropped)": 3,
@@ -35,7 +33,7 @@ _Z_STACK = {
     "EARLY Posterior = \"Embryo 6\", Feb. 20th Emb (1)_L6_Sum.lsm (spliced)": 3,
     "LATE Posterior = \"Embryo 6\", Feb. 20th Emb (1)_L6_Sum.lsm (spliced)": 4
 }
-model_save_dir = 'savedmodels_unet_23'
+model_save_dir = 'savedmodels_unet_29'
 
 
 def main(args=None, train=True, test=False):
@@ -61,15 +59,13 @@ def main(args=None, train=True, test=False):
         test_data = json.load(open(saved_test))
         val_data = json.load(open(saved_val))
 
-    #TODO: split the base dataset train/val/test
-
     if train:
         tt.train_me(data_folder, train_data, val_data,
                     model_save_dir, batch_size=batch_size,
-                    size_to_resize_to=size_to_resize_to, unet_to_load=5)
-    if test:
-        tt.test_me(image_folder, model_dir, test_embs, _Z_STACK,
-                   size_to_resize_to=size_to_resize_to)
+                    size_to_resize_to=size_to_resize_to, unet_to_load=6, min_size=min_size)
+    #if test:
+    #    tt.test_me(image_folder, model_dir, test_embs, _Z_STACK,
+    #               size_to_resize_to=size_to_resize_to)
 
 
 def parse_arguments():

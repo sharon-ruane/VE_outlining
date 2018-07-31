@@ -8,18 +8,19 @@ from U_NET_2 import myUnet as myUnet2
 from U_NET_3 import myUnet as myUnet3
 from U_NET_4 import myUnet as myUnet4
 from U_NET_5 import myUnet as myUnet5
+from U_Net_6 import myUnet as myUnet6
 from U_NET_training_functions import emb_image_batch_generator_v2
 
 def train_me(data_folder, train_emb_list, val_emb_list, model_save_dir,
-             batch_size=32, size_to_resize_to=(96,96), unet_to_load=1):
+             batch_size=32, size_to_resize_to=(96,96), unet_to_load=1, min_size=50):
 
     # do the splitting
     training_generator = emb_image_batch_generator_v2(data_folder, train_emb_list,
                                                    batch_size,
-                                                   size_to_resize_to)
+                                                   size_to_resize_to, MIN_SIZE=min_size)
     validation_generator = emb_image_batch_generator_v2(data_folder, val_emb_list,
                                                      batch_size,
-                                                     size_to_resize_to)
+                                                     size_to_resize_to, MIN_SIZE=min_size)
     if unet_to_load == 1:
         unet = myUnet1(model_save_dir, lowest_loss=2,
                        img_rows=size_to_resize_to[0],
@@ -44,6 +45,11 @@ def train_me(data_folder, train_emb_list, val_emb_list, model_save_dir,
         unet = myUnet5(model_save_dir, lowest_loss=2,
                         img_rows=size_to_resize_to[0],
                         img_cols=size_to_resize_to[1])
+        unet.train(training_generator, validation_generator)
+    if unet_to_load == 6:
+        unet = myUnet6(model_save_dir, lowest_loss=2,
+                       img_rows=size_to_resize_to[0],
+                       img_cols=size_to_resize_to[1])
         unet.train(training_generator, validation_generator)
 
 def test_me(image_folder, model_dir, test_data_path, opt_z_stack_dict, size_to_resize_to=(96, 96)):
