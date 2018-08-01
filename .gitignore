@@ -3,3 +3,6 @@ savedmodels_*
 .idea/
 *.pyc
 *.txt
+epithelial_cell_border_identification/
+*.json
+
