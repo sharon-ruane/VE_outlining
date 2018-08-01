@@ -110,7 +110,7 @@ def emb_image_batch_generator_v2(data_folder, emb_list, batch_size, rsz, MIN_SIZ
 
                     truefalse = crop_emb_outlines_image_arr > 155
 
-                    pixel_labels_batch.append(truefalse.astype(np.uint8))
+                    pixel_labels_batch.append(1-truefalse.astype(np.uint8))
                 fail_counter += 1
 
             #log.info("    couldnt find crossing in {} attempts:".format(fail_counter))
@@ -243,9 +243,9 @@ if __name__ == '__main__':
     # test/show the generator in action
     batch_size = 2
     min_size = 80
-    size_to_resize_to = (256, 256)
-    data_folder = "/home/len/dev/thesis/epithelial_cell_border_identification"
-    force_regenerate_bw_images = False  # set this to true to regenrate the saved outlines if the creation method changes
+    size_to_resize_to = (128, 128)
+    data_folder = "/home/iolie/PhD_Thesis_Data/epithelial_cell_border_identification"
+    force_regenerate_bw_images = False  # WARNING set this to true to regenrate the saved outlines if the creation method changes
 
     dataset = get_base_dataset(data_folder, regenerate_bw=force_regenerate_bw_images)
     training_generator = emb_image_batch_generator_v2(

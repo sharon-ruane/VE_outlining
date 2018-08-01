@@ -18,14 +18,22 @@ from IPython.html.widgets import interact, fixed
 # T_otsu = mh.otsu(dna)
 # print(T_otsu)
 # Image.fromarray(dna > T_otsu).show()
+# gt = "/home/iolie/Desktop/THESIS IMAGES/savedmodels_unet_17/titletraining_weightsatloss_0.36/8/63171347-ae7d-4f44-9e9f-9f2f6d5e77c7ground_truth_8.png"
+# pred = "/home/iolie/Desktop/THESIS IMAGES/savedmodels_unet_17/titletraining_weightsatloss_0.36/8/63171347-ae7d-4f44-9e9f-9f2f6d5e77c7predicted_x255_image_8.png"
+# thresh = "/home/iolie/Desktop/THESIS IMAGES/savedmodels_unet_17/titletraining_weightsatloss_0.36/8/63171347-ae7d-4f44-9e9f-9f2f6d5e77c7_predicted8_threshold0.8.png"
 
 
-bw = "/home/iolie/Desktop/THESIS IMAGES/savedmodels_unet_12/titletraining_weightsatloss_0.28/ea2a195a-e341-4738-aa0e-5dc32daff93bground_truth_0.png"
-wb = "/home/iolie/Desktop/THESIS IMAGES/savedmodels_unet_12/titletraining_weightsatloss_0.28/ea2a195a-e341-4738-aa0e-5dc32daff93b_predicted0_threshold0.8.png"
+gt = "/home/iolie/Desktop/THESIS IMAGES/savedmodels_unet_17/titletraining_weightsatloss_0.32/6/7a05fa8b-1f56-48a8-bbf0-d164bde62fc2ground_truth_6.png"
+lowerthresh = "/home/iolie/Desktop/THESIS IMAGES/savedmodels_unet_17/titletraining_weightsatloss_0.32/6/7a05fa8b-1f56-48a8-bbf0-d164bde62fc2_predicted6_threshold0.7.png"
+thresh = "/home/iolie/Desktop/THESIS IMAGES/savedmodels_unet_17/titletraining_weightsatloss_0.32/6/7a05fa8b-1f56-48a8-bbf0-d164bde62fc2_predicted6_threshold0.8.png"
 
-im = Image.open(wb).convert("L")
+#bw = "/home/iolie/Desktop/THESIS IMAGES/savedmodels_unet_12/titletraining_weightsatloss_0.28/ea2a195a-e341-4738-aa0e-5dc32daff93bground_truth_0.png"
+#wb = "/home/iolie/Desktop/THESIS IMAGES/savedmodels_unet_12/titletraining_weightsatloss_0.28/ea2a195a-e341-4738-aa0e-5dc32daff93b_predicted0_threshold0.8.png"
+
+im = Image.open(thresh).convert("L")
 im.show()
 # inv = PIL.ImageOps.invert(im)
+# imm = np.asarray(inv)
 imm = np.asarray(im)
 
 
