@@ -4,7 +4,7 @@ import os
 import random
 import time
 from PIL import ImageTk, Image, ImageOps
-import tkinter as tk
+import Tkinter as tk
 
 log = logging.getLogger("")
 log.addHandler(logging.StreamHandler())
