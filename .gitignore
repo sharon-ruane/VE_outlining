@@ -4,3 +4,5 @@ savedmodels_*
 *.pyc
 *.txt
 epithelial_cell_border_identification/
+*.json
+

@@ -1,16 +1,24 @@
 import argparse
 import json
-import random
-import os
 from sklearn.model_selection import train_test_split
-
 import testing_training as tt
 from U_NET_training_functions import get_base_dataset
+
+
+"""
+Unet 1: The original and still the best
+Unet 2: ...
+Unet 3: ...
+Unet 4: ...
+Unet 5: ...
+Unet 6: ...
+"""
+unet_to_load = 1
 
 min_size = 52
 batch_size = 6
 size_to_resize_to = (96, 96)
-data_folder = "/home/iolie/PhD_Thesis_Data/epithelial_cell_border_identification"
+data_folder = "/home/iolie/dev/thesis/epithelial_cell_border_identification"
 
 # WARNING THIS WILL OVERWRITE YOUR SAVE LIST OF INPUTS
 regenerate_test_split = False
@@ -62,7 +70,7 @@ def main(args=None, train=True, test=False):
     if train:
         tt.train_me(data_folder, train_data, val_data,
                     model_save_dir, batch_size=batch_size,
-                    size_to_resize_to=size_to_resize_to, unet_to_load=6, min_size=min_size)
+                    size_to_resize_to=size_to_resize_to, unet_to_load=unet_to_load, min_size=min_size)
     #if test:
     #    tt.test_me(image_folder, model_dir, test_embs, _Z_STACK,
     #               size_to_resize_to=size_to_resize_to)

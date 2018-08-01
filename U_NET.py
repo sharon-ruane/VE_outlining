@@ -6,9 +6,11 @@ from unet_base import unet_base
 
 class myUnet(unet_base):
     def __init__(self, img_rows=64, img_cols=64, *args, **kwargs):
+        print ('Initializing UNET 1')
         super(myUnet, self).__init__(*args, **kwargs)
         self.img_rows = img_rows
         self.img_cols = img_cols
+
 
     def get_unet(self):
         inputs = Input((self.img_rows, self.img_cols, 1))
