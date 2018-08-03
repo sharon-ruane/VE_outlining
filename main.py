@@ -13,12 +13,11 @@ Unet 4: ...
 Unet 5: ...
 Unet 6: ...
 """
-unet_to_load = 1
-
-min_size = 52
+unet_to_load = 6
+min_size = 72
 batch_size = 6
 size_to_resize_to = (96, 96)
-data_folder = "/home/iolie/dev/thesis/epithelial_cell_border_identification"
+data_folder = "/home/iolie/PhD_Thesis_Data/epithelial_cell_border_identification"
 
 # WARNING THIS WILL OVERWRITE YOUR SAVE LIST OF INPUTS
 regenerate_test_split = False
@@ -41,7 +40,7 @@ _Z_STACK = {
     "EARLY Posterior = \"Embryo 6\", Feb. 20th Emb (1)_L6_Sum.lsm (spliced)": 3,
     "LATE Posterior = \"Embryo 6\", Feb. 20th Emb (1)_L6_Sum.lsm (spliced)": 4
 }
-model_save_dir = 'savedmodels_unet_29'
+model_save_dir = 'FINAL_TEST_UNET_6_(min size 72)'
 
 
 def main(args=None, train=True, test=False):

@@ -8,7 +8,7 @@ from U_NET_2 import myUnet as myUnet2
 from U_NET_3 import myUnet as myUnet3
 from U_NET_4 import myUnet as myUnet4
 from U_NET_5 import myUnet as myUnet5
-from U_Net_6 import myUnet as myUnet6
+from U_NET_6 import myUnet as myUnet6
 from U_NET_training_functions import emb_image_batch_generator_v2
 
 def train_me(data_folder, train_emb_list, val_emb_list, model_save_dir,

@@ -1,4 +1,4 @@
-infile = 'testit.log'
+infile = 'log30.txt'
 outfile = infile.split('.')[0] + '_parsed.txt'
 
 cromulent_lines = []
